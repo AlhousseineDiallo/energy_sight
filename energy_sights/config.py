@@ -21,6 +21,8 @@ MODELS_DIR: Path = PROJ_ROOT / "models"
 REPORTS_DIR: Path = PROJ_ROOT / "reports"
 FIGURES_DIR: Path = REPORTS_DIR / "figures"
 
+center_lat: float = 47.6062
+center_long: float = -122.3321
 # Columns to remove (Data leakage)
 Leaky_features = [
     # Energetic intensity calculated with the Site Energy Use
@@ -79,12 +81,3 @@ critical_features = [
     'Latitude',
     'Longitude'
 ]
-# If tqdm is installed, configure loguru with tqdm.write
-# https://github.com/Delgan/loguru/issues/135
-try:
-    from tqdm import tqdm
-
-    logger.remove()
-    logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-except ModuleNotFoundError:
-    pass
