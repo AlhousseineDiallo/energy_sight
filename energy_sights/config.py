@@ -74,6 +74,7 @@ critical_features = [
     'PrimaryPropertyType',
     'YearBuilt',
     'PropertyGFATotal',
+    'PropertyGFAParking',
     'Neighborhood',
     'NumberofBuildings',
     'NumberofFloors',

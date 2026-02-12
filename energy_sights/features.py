@@ -28,7 +28,7 @@ def create_date(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def haversine(lat1: float, long1: float, lat2: float, long2: float) -> float:
-    earth_radius: int = 6370 # Km
+    earth_radius: int = 6371 # Km
     try:
         # conversion in radians
         lat1_rad, lat2_rad = np.radians(lat1), np.radians(lat2)
@@ -44,14 +44,17 @@ def haversine(lat1: float, long1: float, lat2: float, long2: float) -> float:
         log.error(f"An error occurs in the haversine function: {e}")
 
 
-
 def create_characteristic(df: pd.DataFrame) -> pd.DataFrame:
     df: pd.DataFrame = df.copy()
 
-    df['AverageFloorArea'] = df['PropertyGFATotal'] / df['NumberofFloors']
+    df['AverageFloorArea']: pd.Series = df['PropertyGFATotal'] / df['NumberofFloors']
 
-    df['DistToCenter'] = df.apply(func=lambda row: haversine(row['Latitude'], center_lat, row['Longitude'], center_long),
+    df['DistToCenter']: pd.Series = df.apply(func=lambda row: haversine(row['Latitude'], center_lat, row['Longitude'], center_long),
                                   axis=1)
+
+    df['ParkingRatio']: pd.Series = df['PropertyGFAParking'] / df['PropertyGFATotal']
+
+    return df
 
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -61,6 +64,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                                     .pipe(func=create_date)\
                                     .pipe(func=create_characteristic)
 
-    log.sucess(f"New columns: {len(processed_df.columns) - len(df.columns)}")
+    log.success(f"New columns: {len(processed_df.columns) - len(df.columns)}")
 
     return processed_df
