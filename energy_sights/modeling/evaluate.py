@@ -69,14 +69,23 @@ def print_metrics(metrics: Dict[str, Any]) -> None:
 
 def plot_features_importance(model, feature_names: list[str]) -> None:
 
-    if hasattr(model, 'steps'):
-        importances = model.named_steps['model'].feature_importances_
+    if isinstance(model, Pipeline):
+        estimator = model.named_steps['model'] # we suppose the estimator is the last element of the pipeline
 
     else:
-        print("This model don't provide importance features")
+        estimator = model
+
+    if hasattr(estimator, 'feature_importances_'):
+        importances = estimator.feature_importances_
+
+    else:
+        print("This model don't provide importance features.")
         return
 
-    features_imp: pd.DataFrame = pd.DataFrame(data=sorted(zip(importances, feature_names)), columns=['Value', 'Features'])
+    features_imp: pd.DataFrame = pd.DataFrame(data={
+        'Value': importances,
+        'Features': feature_names
+    })
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 6))
 
@@ -92,10 +101,3 @@ def plot_features_importance(model, feature_names: list[str]) -> None:
     ax.set_title(label="What's the most important features ?")
     plt.tight_layout()
     plt.show()
-
-
-
-
-
-
-
