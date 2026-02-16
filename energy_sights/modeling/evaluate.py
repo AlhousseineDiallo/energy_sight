@@ -35,8 +35,9 @@ sns.set_style(style='darkgrid')
 
 def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None:
 
-    if isinstance(y_true, pd.DataFrame):
-        y_true = y_true.squeeze()
+    # Fixing the dimension of the arrays
+    y_true = np.array(y_true).ravel()
+    y_pred = np.array(y_pred).ravel()
 
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(15, 6))
     sns.scatterplot(x=y_true,
