@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, m
 from typing import Dict, Any
 from numpy.typing import NDArray
 
-def evaluate_regression(y_true: NDArray, y_pred: NDArray, model_name: str='') -> Dict[str, Any]:
+def evaluate_regression(y_true: NDArray | pd.DataFrame, y_pred: NDArray | pd.DataFrame, model_name: str='') -> Dict[str, Any]:
     # this method will compute the model error
     r2: float = r2_score(y_true=y_true, y_pred=y_pred)
 
@@ -35,7 +35,10 @@ sns.set_style(style='darkgrid')
 
 def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None:
 
-    fig, axes = plt.subplots(n_rows=1, ncols=1, figsize=(15, 6))
+    if isinstance(y_true, pd.DataFrame):
+        y_true = y_true.squeeze()
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(15, 6))
     sns.scatterplot(x=y_true,
                     y=y_pred,
                     alpha=.6,
@@ -60,7 +63,7 @@ def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None
 
 
 def print_metrics(metrics: Dict[str, Any]) -> None:
-    print(f"\n Model performance : {metrics['model']}")
+    print(f"\n Model performance : {metrics['model_name']}")
     print(f"  RMSE (Root Mean Squared Error) : {metrics['RMSE']:,.2f}")
     print(f"  MAE  (Mean Absolute Error)     : {metrics['MAE']:,.2f}")
     print(f"  MAPE (Error %)           : {metrics['MAPE']:.2%}")  # Percentage format
@@ -70,7 +73,7 @@ def print_metrics(metrics: Dict[str, Any]) -> None:
 def plot_features_importance(model, feature_names: list[str]) -> None:
 
     if isinstance(model, Pipeline):
-        estimator = model.named_steps['model'] # we suppose the estimator is the last element of the pipeline
+        estimator = model.named_steps['model']
 
     else:
         estimator = model
