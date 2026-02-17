@@ -2,6 +2,7 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
 
 from typing import Dict, Any
@@ -39,11 +40,11 @@ def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None
     y_true = np.array(y_true).ravel()
     y_pred = np.array(y_pred).ravel()
 
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(15, 6))
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
     sns.scatterplot(x=y_true,
                     y=y_pred,
                     alpha=.6,
-                    color='#878472',
+                    color='#E4FDE1',
                     lw=2.2, ec='k',
                     s=60, ax=axes[0])
     axes[0].set_xlabel(xlabel='Real Values')
@@ -73,8 +74,8 @@ def print_metrics(metrics: Dict[str, Any]) -> None:
 
 def plot_features_importance(model, feature_names: list[str]) -> None:
 
-    if isinstance(model, Pipeline):
-        estimator = model.named_steps['model']
+    if isinstance(model, TransformedTargetRegressor):
+        estimator = model.regressor_.named_steps['model']
 
     else:
         estimator = model
