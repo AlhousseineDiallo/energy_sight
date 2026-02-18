@@ -97,7 +97,6 @@ def plot_features_importance(model, feature_names: list[str]) -> None:
     sns.barplot(data=features_imp.sort_values(by='Value', ascending=False),
                 x='Value',
                 y='Features',
-                hash='/',
                 color='#FCF7F8',
                 lw=2.2,
                 ec='k',
@@ -106,3 +105,26 @@ def plot_features_importance(model, feature_names: list[str]) -> None:
     ax.set_title(label="What's the most important features ?")
     plt.tight_layout()
     plt.show()
+
+
+def print_feature_importances(model, feature_names: list[str]) -> pd.DataFrame | None:
+    if isinstance(model, TransformedTargetRegressor):
+        estimator = model.regressor_
+
+    else:
+        estimator = model
+
+    if hasattr(estimator, feature_importances_):
+        importances = estimator.feature_importances_
+
+    else:
+        print(f"The model don't provide importance features")
+        return None
+
+    fea_df: pd.DataFrame = pd.DataFrame(data={
+        'Features': feature_names,
+        'Values': importances
+    })
+
+    return fea_df.sort_values(by='Values', ascending=False)
+
