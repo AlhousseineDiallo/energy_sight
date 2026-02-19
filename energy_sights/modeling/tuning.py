@@ -3,6 +3,8 @@ from typing import Dict, Any
 from sklearn.model_selection import RandomizedSearchCV
 from energy_sights.logging_config import setup_logging, get_task_logger
 from datetime import datetime
+from numpy.typing import NDArray
+from pandas import DataFrame
 
 setup_logging()
 
@@ -13,26 +15,34 @@ def get_param_grid(model_type: str) -> Dict[str, Any]:
     if model_type.strip().lower() == 'random_forest':
 
         return {
-            'regressor__model__n_estimators': [100, 200, 300, 500],
-            'regressor__model__max_depth': [None, 10, 20, 30],
-            'regressor__model__min_samples_split': [2, 5, 10],
-            'regressor__model__min_samples_leaf': [1, 2, 4]
+            'regressor__model__n_estimators': [200, 300, 500],
+            'regressor__model__max_depth': [5, 7, 10, 12],
+            'regressor__model__min_samples_split': [10, 20, 30],
+            'regressor__model__min_samples_leaf': [8, 10, 12, 5],
+            'regressor__model__bootstrap': [True],
+            'regressor__model__max_features': ['sqrt', .5, .7]
+
         }
 
     elif model_type.strip().lower() == 'xgboost':
         return {
-            'regressor__model__n_estimators': [100, 200, 500],
-            'regressor__model__max_depth': [3, 5, 7, 9],
-            'regressor__model__learning_rate': [0.01, 0.02, 0.07, 0.1],
-            'regressor__model__subsample': [0.6, 0.8, 1.0],
-            'regressor__model__colsample_bytree': [0.6, 0.8, 1.0]
+            'regressor__model__n_estimators': [300, 500, 200],
+            'regressor__model__max_depth': [4, 6, 8],
+            'regressor__model__learning_rate': [0.01, 0.03, 0.05],
+            'regressor__model__subsample': [0.8, 0.7],
+            'regressor__model__colsample_bytree': [0.6, 0.5, 0.7],
+            'regressor__model__gamma': [0.5, 0.1, 0],
+            'regressor__model__min_child_weight': [1, 3, 5],
+            # regularization to avoid the overfitting of the model
+            'regressor__model__alpha': [0.5, 0.7, 1.0], # L1 Lasso
+            'regressor__model__lambda': [1, 2.0]
         }
 
 
     return {}
 
 
-def tune_model(model, X_train, y_train, model_type: str, n_iter: int=20):
+def tune_model(model, X_train: NDArray | DataFrame, y_train: NDArray | DataFrame, model_type: str, n_iter: int=20):
 
     param_grid = get_param_grid(model_type=model_type)
 
@@ -42,15 +52,15 @@ def tune_model(model, X_train, y_train, model_type: str, n_iter: int=20):
         estimator=model,
         param_distributions=param_grid,
         n_iter=n_iter,
-        scoring='neg_mean_squared_error',
+        scoring='neg_mean_absolute_error',
         n_jobs=-1, # this use all the core of the CPU
-        verbose=2.2,
+        verbose=2,
         random_state=42
     )
 
     search.fit(X_train, y_train)
 
-    print(f"The best models finds are: {search.best_params_}")
+    print(f"The best parameters finds are: {search.best_params_}")
     print(f"The best Score (RMSE roughly): {np.sqrt(-search.best_score_):.2f}")
 
     return search.best_estimator_
