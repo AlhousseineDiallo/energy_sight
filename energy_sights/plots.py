@@ -1,28 +1,19 @@
+from typing import Optional
+from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import plotly.express as px
 from pandas.core.dtypes.common import is_numeric_dtype
 from energy_sights.logging_config import setup_logging, get_task_logger
+from energy_sights.config import FIGURES_DIR
 
 setup_logging()
 
 log = get_task_logger(task_name='plots')
 
 
-def plot_distribution(df: pd.DataFrame, col: str, bins: int=10) -> None:
-    """
-    Plot the distribution of a numerical variable.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input dataframe
-    col : str
-        Numerical column to plot
-    bins: int
-        Numerical the number of bins
-    """
+def plot_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None, bins: int=10) -> None:
     log.info(f"Plotting distribution for column: {col}")
     fig, axes = plt.subplots(nrows=2, ncols=1, layout='tight', figsize=(14, 7))
     sns.boxplot(data=df,
@@ -47,11 +38,21 @@ def plot_distribution(df: pd.DataFrame, col: str, bins: int=10) -> None:
     axes[1].set_ylabel(ylabel='')
 
     plt.tight_layout()
+
+    if isinstance(save_plot, str):
+        if not save_plot.endswith('.png'):
+            save_plot += '.png'
+            log.info('We automatically add the extension .png')
+
+        save_path: Path = FIGURES_DIR / save_plot
+        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+        log.info(f'Graphic: {col} distribution saved successfully at: {save_path}.')
+
     plt.show()
     log.success(f'Plot generation for the column {col} complete')
 
 
-def interactive_distribution(df: pd.DataFrame, col: str, n_bins: int=50) -> None:
+def interactive_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None, n_bins: int=50) -> None:
     if not is_numeric_dtype(df[col]):
         log.error(f'The column {col} must be numeric.')
         raise TypeError(f"The column {col} must be numeric")
@@ -62,10 +63,18 @@ def interactive_distribution(df: pd.DataFrame, col: str, n_bins: int=50) -> None
                        title=f"{col} Distribution",
                        nbins=n_bins)
     fig.update_layout(bargap=.1)
+    if isinstance(save_plot, str):
+        if not save_plot.endswith('.png'):
+            save_plot += '.png'
+            log.info('The name is not correct ! We add the extension .png automatically.')
+
+        save_path: Path = FIGURES_DIR / save_plot
+        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+        log.info(f'Graphic: {col} interactive distribution saved successfully at: {save_path}')
     fig.show()
 
 
-def heat_correlation(df: pd.DataFrame, num_only: bool=True, method: str='pearson') -> None:
+def heat_correlation(df: pd.DataFrame, save_plot: Optional[str]=None, num_only: bool=True, method: str='pearson') -> None:
     possible_methods: list[str] = ['pearson', 'spearman', 'kendall']
     if df.empty:
         log.error("heat_correlation is impossible: the dataframe is empty.")
@@ -87,6 +96,17 @@ def heat_correlation(df: pd.DataFrame, num_only: bool=True, method: str='pearson
 
     fig.suptitle(t='Correlation in the Data')
     plt.tight_layout()
+
+    if isinstance(save_plot, str):
+        if not save_plot.endswith('.png'):
+            save_plot += '.png'
+            log.info('We automatically add the extension .png')
+        save_path: Path = FIGURES_DIR / save_plot
+
+        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+
+        log.info(f"The correlation matrix has been successfully saved at: {save_path}")
+
     plt.show()
 
     log.info(

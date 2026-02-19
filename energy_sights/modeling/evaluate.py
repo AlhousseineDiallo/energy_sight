@@ -2,10 +2,12 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from pathlib import Path
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
+from energy_sights.config import FIGURES_DIR
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from numpy.typing import NDArray
 
 def evaluate_regression(y_true: NDArray | pd.DataFrame, y_pred: NDArray | pd.DataFrame, model_name: str='') -> Dict[str, Any]:
@@ -34,7 +36,7 @@ plt.rcParams['axes.labelsize'] = 14
 sns.set_style(style='darkgrid')
 
 
-def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None:
+def plot_residuals(y_true: NDArray, y_pred: NDArray, save_plot: Optional[str]=None, model_name: str="") -> None:
 
     # Fixing the dimension of the arrays
     y_true = np.array(y_true).ravel()
@@ -61,6 +63,15 @@ def plot_residuals(y_true: NDArray, y_pred: NDArray, model_name: str="") -> None
     axes[1].axvline(x=0, color='#A41623', linestyle='--')
 
     plt.tight_layout()
+
+    if isinstance(save_plot, str):
+        if not save_plot.endswith('.png'):
+            save_plot += '.png'
+            log.info('We automatically add the extension .png')
+        save_path: Path = FIGURES_DIR / save_plot
+
+        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+        log.info(f"The residuals plot of the {model_name} successfully saved at: {save_path}")
     plt.show()
 
 
@@ -72,7 +83,7 @@ def print_metrics(metrics: Dict[str, Any]) -> None:
     print(f"  R²   (Score explication)  : {metrics['r2_score']:.4f}")
 
 
-def plot_features_importance(model, feature_names: list[str]) -> None:
+def plot_features_importance(model, feature_names: list[str], save_plot: Optional[str]=None) -> None:
 
     if isinstance(model, TransformedTargetRegressor):
         estimator = model.regressor_.named_steps['model']
@@ -104,17 +115,28 @@ def plot_features_importance(model, feature_names: list[str]) -> None:
 
     ax.set_title(label="What's the most important features ?")
     plt.tight_layout()
+    if isinstance(save_plot, str):
+        if not save_plot.endswith('png'):
+            save_plot += '.png'
+            log.info(f'The extension of the file is not correct ! We add the .png automatically.')
+
+        save_path: Path = FIGURES_DIR / save_plot
+
+        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+
+        log.info(f'Graphic saved successfully at: {save_path}')
+
     plt.show()
 
 
 def print_feature_importances(model, feature_names: list[str]) -> pd.DataFrame | None:
     if isinstance(model, TransformedTargetRegressor):
-        estimator = model.regressor_
+        estimator = model.regressor_.named_steps['model']
 
     else:
         estimator = model
 
-    if hasattr(estimator, feature_importances_):
+    if hasattr(estimator, 'feature_importances_'):
         importances = estimator.feature_importances_
 
     else:
