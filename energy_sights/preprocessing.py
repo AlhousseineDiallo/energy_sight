@@ -1,3 +1,9 @@
+"""Fonctions de prétraitement et de nettoyage des donnees tabulaires.
+
+Ce module regroupe des utilitaires utilisés en phase d'analyse préparatoire
+et de preparation des donnees avant modelisation.
+"""
+
 import pandas as pd
 import numpy as np
 from pandas import Series
@@ -12,6 +18,14 @@ log = get_task_logger(task_name='preprocessing')
 log.info('Starting the Preprocessing')
 
 def drop_constant_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Supprime les colonnes constantes d'un DataFrame.
+
+    Args:
+        df: Jeu de donnees en entree.
+
+    Returns:
+        Un nouveau DataFrame sans les colonnes dont la cardinalité vaut 1.
+    """
     constant_columns: list[str] = df.nunique()[df.nunique().apply(func=lambda x: x == 1)].index.tolist()
     log.info(f"The constant columns of the dataframe are: {constant_columns}")
     df_cleaned = df.drop(columns=constant_columns)
@@ -19,12 +33,32 @@ def drop_constant_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def nan_percent(df: pd.DataFrame) -> None:
+    """Affiche le taux de valeurs manquantes colonne par colonne.
+
+    Args:
+        df: Jeu de donnees a diagnostiquer.
+    """
     for col in df.columns:
         nulls_percents = np.mean(df[col].isna())
         print(f"{col} -> {nulls_percents: .4f} %\n")
 
 
 def clean_neighborhood(df: pd.DataFrame, col: str='Neighborhood') -> pd.DataFrame:
+    """Normalise les libelles d'un champ de quartier.
+
+    Le nettoyage applique un trim, une normalisation en casse titre et un
+    mapping explicite de certaines valeurs.
+
+    Args:
+        df: Jeu de donnees source.
+        col: Nom de la colonne à nettoyer.
+
+    Returns:
+        Le DataFrame avec la colonne nettoyée.
+
+    Raises:
+        ValueError: Si la colonne cible n'existe pas.
+    """
     # entry validation
     if col not in df.columns:
         log.error(f'Column {col} not found in the Dataframe !')
@@ -42,6 +76,21 @@ def clean_neighborhood(df: pd.DataFrame, col: str='Neighborhood') -> pd.DataFram
 
 
 def find_case_insensitive_duplicates(df: pd.DataFrame, col: str) -> dict[str, int]:
+    """Détecté les doublons de modalités en ignorant la casse.
+
+    Exemple: "Downtown" et "downtown" sont regroupes comme meme cle logique.
+
+    Args:
+        df: Jeu de donnees source.
+        col: Colonne catégoriale a auditer.
+
+    Returns:
+        Un dictionnaire des cles dupliquées (en minuscule) avec le nombre
+        de variantes de casse détectées.
+
+    Raises:
+        ValueError: Si la colonne cible n'existe pas.
+    """
     # entry validation
     if col not in df.columns:
         log.error(f'Column {col} not found in the Dataframe !')
@@ -62,6 +111,21 @@ def find_case_insensitive_duplicates(df: pd.DataFrame, col: str) -> dict[str, in
 
 
 def numeric_describe(df: pd.DataFrame, col: 'str') -> Series:
+    """Produit un resume statistique enrichi pour une colonne numérique.
+
+    Le résultat concaténé les statistiques standards de `describe()` et la
+    ou les modalités de mode.
+
+    Args:
+        df: Jeu de donnees source.
+        col: Colonne numérique cible.
+
+    Returns:
+        Une série contenant les statistiques descriptives et le mode.
+
+    Raises:
+        ValueError: Si la colonne est absente ou non numérique.
+    """
     if col not in df.columns:
         log.error(f'Column {col} not found in the dataframe')
         raise ValueError(f'Column {col} not found in {df}')
@@ -77,12 +141,28 @@ def numeric_describe(df: pd.DataFrame, col: 'str') -> Series:
 
 
 def logarithm(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Applique une transformation logarithmique à une colonne numérique.
+
+    La colonne d'origine est remplacée par une nouvelle colonne suffixée
+    par `Log`.
+
+    Args:
+        df: Jeu de donnees source.
+        col: Nom de la colonne à transformer.
+
+    Returns:
+        Un DataFrame avec la colonne transformée.
+
+    Raises:
+        ValueError: Si la colonne n'est pas numérique.
+    """
     df: pd.DataFrame = df.copy()
     if not is_numeric_dtype(df[col]):
         log.error(f"The column {col} must be numeric.")
         raise ValueError(f"Column is not numeric")
 
     df[f"{col}Log"]: pd.Series = np.log(df[col])
+    df = df.drop(columns=col)
     log.info(f"The logarithm function has been used on {col} with success.")
     return df
 

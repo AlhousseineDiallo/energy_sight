@@ -1,3 +1,10 @@
+"""Configuration centralisée du logging applicatif.
+
+Ce module fournit:
+- une configuration globale des handlers Loguru
+- un logger specialise par tache avec sortie fichier dédiée.
+"""
+
 from loguru import logger
 from pathlib import Path
 import sys
@@ -7,6 +14,11 @@ logs_dir: Path = Path(__file__).resolve().parents[1] / 'logs'
 logs_dir.mkdir(exist_ok=True)
 
 def setup_logging():
+    """Initialise les handlers Loguru de base.
+
+    La configuration actuelle redirige les logs de niveau INFO vers la sortie
+    standard avec un format enrichi.
+    """
     # removal of the old handler
     logger.remove()
 
@@ -25,6 +37,14 @@ def setup_logging():
 
 
 def get_task_logger(task_name: str):
+    """Retourne un logger lie a une tache et route vers un fichier dedie.
+
+    Args:
+        task_name: Nom fonctionnel de la tache (ex: `preprocessing`).
+
+    Returns:
+        Un logger Loguru avec contexte `task` et filtre d'écriture associe.
+    """
 
     log_file = logs_dir / f"{task_name}.log"
 

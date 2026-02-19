@@ -1,3 +1,9 @@
+"""Utilitaires de visualisation pour l'analyse exploratoire.
+
+Le module propose des graphiques de distribution (statiques et interactifs)
+et des matrices de correlation.
+"""
+
 from typing import Optional
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -14,6 +20,14 @@ log = get_task_logger(task_name='plots')
 
 
 def plot_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None, bins: int=10) -> None:
+    """Trace la distribution d'une variable numérique (boxplot + histogramme).
+
+    Args:
+        df: DataFrame source.
+        col: Colonne à visualiser.
+        save_plot: Nom de fichier de sauvegarde optionnel.
+        bins: Nombre de classes de l'histogramme.
+    """
     log.info(f"Plotting distribution for column: {col}")
     fig, axes = plt.subplots(nrows=2, ncols=1, layout='tight', figsize=(14, 7))
     sns.boxplot(data=df,
@@ -53,6 +67,17 @@ def plot_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None,
 
 
 def interactive_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None, n_bins: int=50) -> None:
+    """Trace une distribution interactive avec Plotly.
+
+    Args:
+        df: DataFrame source.
+        col: Colonne numérique à visualiser.
+        save_plot: Nom de fichier de sauvegarde optionnel.
+        n_bins: Nombre de classes de l'histogramme.
+
+    Raises:
+        TypeError: Si la colonne cible n'est pas numérique.
+    """
     if not is_numeric_dtype(df[col]):
         log.error(f'The column {col} must be numeric.')
         raise TypeError(f"The column {col} must be numeric")
@@ -75,6 +100,17 @@ def interactive_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str
 
 
 def heat_correlation(df: pd.DataFrame, save_plot: Optional[str]=None, num_only: bool=True, method: str='pearson') -> None:
+    """Affiche une matrice de correlation sous forme de heatmap.
+
+    Args:
+        df: DataFrame source.
+        save_plot: Nom de fichier de sauvegarde optionnel.
+        num_only: Si vrai, limite le calcul aux colonnes numériques.
+        method: Methode de correlation (`pearson`, `spearman`, `kendall`).
+
+    Raises:
+        ValueError: Si la methode n'est pas supportée.
+    """
     possible_methods: list[str] = ['pearson', 'spearman', 'kendall']
     if df.empty:
         log.error("heat_correlation is impossible: the dataframe is empty.")

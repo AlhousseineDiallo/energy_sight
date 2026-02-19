@@ -1,3 +1,9 @@
+"""Fonctions d'optimisation des hyperparameters des modèles.
+
+Le module propose des grilles de recherche par famille de modèle et une
+procedure de tuning basée sur `RandomizedSearchCV`.
+"""
+
 import numpy as np
 from typing import Dict, Any
 from sklearn.model_selection import RandomizedSearchCV, KFold
@@ -11,6 +17,15 @@ setup_logging()
 log = get_task_logger(task_name='model_tuning')
 
 def get_param_grid(model_type: str) -> Dict[str, Any]:
+    """Construit la grille hyperparameters selon le type de modèle.
+
+    Args:
+        model_type: Identifiant du modèle (`random_forest` ou `xgboost`).
+
+    Returns:
+        Dictionnaire des distributions de paramètres compatible pipeline
+        scikit-learn. Retourne un dictionnaire vide si le modèle est inconnu.
+    """
 
     if model_type.strip().lower() == 'random_forest':
 
@@ -43,6 +58,18 @@ def get_param_grid(model_type: str) -> Dict[str, Any]:
 
 
 def tune_model(model, X_train: NDArray | DataFrame, y_train: NDArray | DataFrame, model_type: str, n_iter: int=20):
+    """Optimise un modèle via recherche aleatoire avec validation croisée.
+
+    Args:
+        model: Estimateur pipeline à optimiser.
+        X_train: Variables d'entrée d'entrainement.
+        y_train: Cible d'entrainement.
+        model_type: Type de modèle pour sélectionner la grille.
+        n_iter: Nombre d'itérations de recherche aleatoire.
+
+    Returns:
+        Le meilleur estimateur trouve par `RandomizedSearchCV`.
+    """
     cv_strategy = KFold(n_splits=5, random_state=42, shuffle=True)
     param_grid = get_param_grid(model_type=model_type)
 

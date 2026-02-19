@@ -1,3 +1,9 @@
+"""Utilitaires d'évaluation des modèles de regression.
+
+Ce module centralise le calcul des métriques, l'affichage des performances
+et des visualisations de diagnostic (résidus, importances de variables).
+"""
+
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +17,17 @@ from typing import Dict, Any, Optional
 from numpy.typing import NDArray
 
 def evaluate_regression(y_true: NDArray | pd.DataFrame, y_pred: NDArray | pd.DataFrame, model_name: str='') -> Dict[str, Any]:
+    """Calcule les métriques principales d'un modèle de regression.
+
+    Args:
+        y_true: Valeurs réelles de reference.
+        y_pred: Valeurs prédites par le modèle.
+        model_name: Nom du modèle évalué.
+
+    Returns:
+        Un dictionnaire contenant `r2_score`, `RMSE`, `MAE`, `MAPE`
+        ainsi que `model_name`.
+    """
     # this method will compute the model error
     r2: float = r2_score(y_true=y_true, y_pred=y_pred)
 
@@ -37,6 +54,18 @@ sns.set_style(style='darkgrid')
 
 
 def plot_residuals(y_true: NDArray, y_pred: NDArray, save_plot: Optional[str]=None, model_name: str="") -> None:
+    """Trace les diagnostics de prediction et de résidus.
+
+    Le graphique produit deux vues:
+    - valeurs réelles vs predictions
+    - distribution des résidus
+
+    Args:
+        y_true: Valeurs réelles.
+        y_pred: Valeurs prédites.
+        save_plot: Nom de fichier de sortie optionnel.
+        model_name: Libelle du modèle affiche sur le graphe.
+    """
 
     # Fixing the dimension of the arrays
     y_true = np.array(y_true).ravel()
@@ -76,6 +105,11 @@ def plot_residuals(y_true: NDArray, y_pred: NDArray, save_plot: Optional[str]=No
 
 
 def print_metrics(metrics: Dict[str, Any]) -> None:
+    """Affiche les métriques de regression dans un format lisible.
+
+    Args:
+        metrics: Dictionnaire produit par `evaluate_regression`.
+    """
     print(f"\n Model performance : {metrics['model_name']}")
     print(f"  RMSE (Root Mean Squared Error) : {metrics['RMSE']:,.2f}")
     print(f"  MAE  (Mean Absolute Error)     : {metrics['MAE']:,.2f}")
@@ -84,6 +118,13 @@ def print_metrics(metrics: Dict[str, Any]) -> None:
 
 
 def plot_features_importance(model, feature_names: list[str], save_plot: Optional[str]=None) -> None:
+    """Visualise l'importance des variables pour les modèles compatibles.
+
+    Args:
+        model: Estimateur ou `TransformedTargetRegressor`.
+        feature_names: Liste ordonnée des noms de variables.
+        save_plot: Nom de fichier de sortie optionnel.
+    """
 
     if isinstance(model, TransformedTargetRegressor):
         estimator = model.regressor_.named_steps['model']
@@ -130,6 +171,16 @@ def plot_features_importance(model, feature_names: list[str], save_plot: Optiona
 
 
 def print_feature_importances(model, feature_names: list[str]) -> pd.DataFrame | None:
+    """Retourne les importances de variables sous forme tabulaire.
+
+    Args:
+        model: Estimateur ou `TransformedTargetRegressor`.
+        feature_names: Liste ordonnée des noms de variables.
+
+    Returns:
+        Un DataFrame trie par importance décroissante, ou `None` si le
+        modèle n'expose pas `feature_importances_`.
+    """
     if isinstance(model, TransformedTargetRegressor):
         estimator = model.regressor_.named_steps['model']
 
