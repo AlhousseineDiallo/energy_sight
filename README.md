@@ -10,7 +10,7 @@ Le projet suit une démarche data science complète : exploration, nettoyage, in
 ## 2. Contexte et Objectifs
 Ce travail vise à construire des modèles de régression robustes, interprétables et exploitables pour :
 - estimer la consommation énergétique d'un bâtiment à partir de ses caractéristiques structurelles et d'usage
-- estimer son niveau d'émissions GES
+- estimer son niveau d'émissions GES (Greenhouse Gases)
 - identifier les leviers explicatifs les plus influents via l'importance des variables
 
 Cibles modélisées (définies dans `energy_sights/config.py`) :
@@ -166,14 +166,6 @@ Points de vigilance actuels :
 - modèles entraînés sauvegardés dans `models/`
 - données traitées prêtes pour réexécution dans `data/processed/`
 
-## 11. Perspective de Professionnalisation
-Axes prioritaires pour une mise en production complète :
-- industrialiser `dataset.py` et `predict.py` avec entrées/sorties robustes et validations de schéma
-- remplacer le test placeholder par une suite de tests métier (qualité data, non-régression métrique, robustesse pipeline)
-- ajouter un suivi d'expériences (versionnement des paramètres et métriques)
-- documenter une convention de versionnage des modèles (`model registry` interne)
-
----
 
 ### Contact Projet
 Auteur : `alhousseine_diallo` (déclaré dans `pyproject.toml`)
