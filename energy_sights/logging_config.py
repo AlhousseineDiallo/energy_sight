@@ -30,7 +30,6 @@ def setup_logging():
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> - <level>{message}</level>"
     )
 
-    # adding of an optional handler, the console
     logger.add(
         sink=sys.stdout, level='INFO'
     )
