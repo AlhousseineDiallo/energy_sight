@@ -99,7 +99,7 @@ def interactive_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str
             log.info('The name is not correct ! We add the extension .png automatically.')
 
         save_path: Path = FIGURES_DIR / save_plot
-        fig.savefig(fname=save_path, dpi=300, bbox_inches='tight')
+        fig.write_image(file=save_path, engine='kaleido')
         log.info(f'Graphic: {col} interactive distribution saved successfully at: {save_path}')
     fig.show()
 
