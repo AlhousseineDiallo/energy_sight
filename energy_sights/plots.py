@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import re
 import plotly.express as px
 from pandas.core.dtypes.common import is_numeric_dtype
 from energy_sights.logging_config import setup_logging, get_task_logger
@@ -55,6 +56,8 @@ def plot_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str]=None,
 
     if isinstance(save_plot, str):
         if not save_plot.endswith('.png'):
+            # suppression des espaces pour avoir des noms conformes aux conventions
+            save_plot: str = re.sub(pattern=r'\s+', repl='_', string=save_plot.strip()).lower()
             save_plot += '.png'
             log.info('We automatically add the extension .png')
 
@@ -90,6 +93,8 @@ def interactive_distribution(df: pd.DataFrame, col: str, save_plot: Optional[str
     fig.update_layout(bargap=.1)
     if isinstance(save_plot, str):
         if not save_plot.endswith('.png'):
+            # Procédons à l'usage de regex pour assurer une meilleure qualité du code.
+            save_plot: str = re.sub(pattern=r'\s+', repl='_', string=save_plot.strip()).lower()
             save_plot += '.png'
             log.info('The name is not correct ! We add the extension .png automatically.')
 
@@ -135,6 +140,7 @@ def heat_correlation(df: pd.DataFrame, save_plot: Optional[str]=None, num_only: 
 
     if isinstance(save_plot, str):
         if not save_plot.endswith('.png'):
+            save_plot: str = re.sub(pattern=r'\s+', repl='_', string=save_plot.strip()).lower()
             save_plot += '.png'
             log.info('We automatically add the extension .png')
         save_path: Path = FIGURES_DIR / save_plot
