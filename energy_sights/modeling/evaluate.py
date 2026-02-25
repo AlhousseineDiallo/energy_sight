@@ -12,6 +12,11 @@ from pathlib import Path
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
 from energy_sights.config import FIGURES_DIR
+from energy_sights.logging_config import setup_logging, get_task_logger
+
+setup_logging()
+
+log = get_task_logger(task_name='model_evaluation')
 
 from typing import Dict, Any, Optional
 from numpy.typing import NDArray
